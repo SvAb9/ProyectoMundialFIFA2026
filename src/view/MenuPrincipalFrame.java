@@ -68,7 +68,6 @@ public class MenuPrincipalFrame extends JFrame {
     private JScrollPane buildSidebar() {
         JPanel sidebar = new JPanel();
         sidebar.setBackground(SIDEBAR);
-        sidebar.setPreferredSize(new Dimension(220, 0));
         sidebar.setLayout(new BoxLayout(sidebar, BoxLayout.Y_AXIS));
         sidebar.setBorder(new EmptyBorder(24, 0, 24, 0));
 
@@ -101,6 +100,7 @@ public class MenuPrincipalFrame extends JFrame {
             sidebar.add(makeNavButton("Estadios",        () -> abrirPanel("estadios")));
             sidebar.add(makeNavButton("Grupos",          () -> abrirPanel("grupos")));
             sidebar.add(makeNavButton("Partidos",        () -> abrirPanel("partidos")));
+            sidebar.add(makeNavButton("Posiciones", () -> abrirPanel("posiciones")));
             sidebar.add(Box.createVerticalStrut(8));
             sidebar.add(makeSeparator());
         }
@@ -251,6 +251,8 @@ public class MenuPrincipalFrame extends JFrame {
             case "r_jugadores_filtro"-> new ReporteJugadoresFiltroPanel();
             case "r_valor_equipo"    -> new ReporteValorEquipoPanel();
             case "r_paises_sede"     -> new ReportePaisesSedPanel();
+            case "posiciones" -> new PosicionPanel();
+            case "usuarios" -> new UsuarioPanel();
             default -> {
                 JPanel p = new JPanel(new GridBagLayout());
                 p.setBackground(BG);

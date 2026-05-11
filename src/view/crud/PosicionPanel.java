@@ -1,7 +1,7 @@
 package view.crud;
 
-import controller.CiudadController;
-import model.Ciudad;
+import controller.PosicionController;
+import model.Posicion;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -9,12 +9,11 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.RoundRectangle2D;
-import view.components.RoundTextField;
 
 /**
- * CiudadPanel - CRUD de ciudades sede.
+ * PosicionPanel - CRUD de posiciones de jugadores.
  */
-public class CiudadPanel extends JPanel {
+public class PosicionPanel extends JPanel {
 
     private static final Color BG       = new Color(0xF5F5F2);
     private static final Color CARD     = Color.WHITE;
@@ -32,14 +31,16 @@ public class CiudadPanel extends JPanel {
     private JTable            tabla;
     private DefaultTableModel modelo;
     private JTextField        txtNombre;
-    private JComboBox<String> cmbPais;
+    private JTextField        txtDescripcion;
     private JLabel            lblMensaje;
-    private JButton           btnGuardar, btnEliminar, btnNuevo;
+    private JButton           btnGuardar;
+    private JButton           btnEliminar;
+    private JButton           btnNuevo;
 
-    private final CiudadController controller = new CiudadController();
+    private final PosicionController controller = new PosicionController();
     private int idSeleccionado = -1;
 
-    public CiudadPanel() {
+    public PosicionPanel() {
         setLayout(new BorderLayout(16, 16));
         setBackground(BG);
         setBorder(new EmptyBorder(20, 20, 20, 20));
@@ -49,27 +50,39 @@ public class CiudadPanel extends JPanel {
         cargarTabla();
     }
 
+    // -------------------------------------------------------------------------
+    // Header
+    // -------------------------------------------------------------------------
     private JPanel buildHeader() {
         JPanel p = new JPanel(new BorderLayout());
         p.setBackground(BG);
-        JLabel t = new JLabel("Ciudades");
-        t.setFont(new Font("Segoe UI", Font.BOLD, 20));
-        t.setForeground(TEXT_PRI);
-        JLabel s = new JLabel("Ciudades sede del mundial");
-        s.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-        s.setForeground(TEXT_SEC);
-        JPanel tp = new JPanel();
-        tp.setLayout(new BoxLayout(tp, BoxLayout.Y_AXIS));
-        tp.setBackground(BG);
-        tp.add(t); tp.add(s);
-        p.add(tp, BorderLayout.WEST);
+
+        JLabel titulo = new JLabel("Posiciones");
+        titulo.setFont(new Font("Segoe UI", Font.BOLD, 20));
+        titulo.setForeground(TEXT_PRI);
+
+        JLabel sub = new JLabel("Gestión de posiciones de jugadores");
+        sub.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        sub.setForeground(TEXT_SEC);
+
+        JPanel t = new JPanel();
+        t.setLayout(new BoxLayout(t, BoxLayout.Y_AXIS));
+        t.setBackground(BG);
+        t.add(titulo);
+        t.add(sub);
+
+        p.add(t, BorderLayout.WEST);
         return p;
     }
 
+    // -------------------------------------------------------------------------
+    // Tabla
+    // -------------------------------------------------------------------------
     private JScrollPane buildTabla() {
-        modelo = new DefaultTableModel(new String[]{"ID", "Nombre", "País"}, 0) {
+        modelo = new DefaultTableModel(new String[]{"ID", "Nombre", "Descripción"}, 0) {
             @Override public boolean isCellEditable(int r, int c) { return false; }
         };
+
         tabla = new JTable(modelo) {
             @Override public Component prepareRenderer(
                     javax.swing.table.TableCellRenderer r, int row, int col) {
@@ -84,22 +97,30 @@ public class CiudadPanel extends JPanel {
         tabla.setShowGrid(false);
         tabla.setIntercellSpacing(new Dimension(0, 0));
         tabla.setSelectionBackground(SEL_BG);
+        tabla.setSelectionForeground(TEXT_PRI);
         tabla.setFocusable(false);
         tabla.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 12));
         tabla.getTableHeader().setBackground(TH_BG);
         tabla.getTableHeader().setForeground(TEXT_SEC);
+
+        // Ocultar columna ID
         tabla.getColumnModel().getColumn(0).setMinWidth(0);
         tabla.getColumnModel().getColumn(0).setMaxWidth(0);
         tabla.getColumnModel().getColumn(0).setWidth(0);
+
         tabla.getSelectionModel().addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) cargarEnFormulario();
         });
+
         JScrollPane scroll = new JScrollPane(tabla);
         scroll.setBorder(BorderFactory.createLineBorder(BORDER_N, 1, true));
         scroll.getViewport().setBackground(CARD);
         return scroll;
     }
 
+    // -------------------------------------------------------------------------
+    // Formulario lateral
+    // -------------------------------------------------------------------------
     private JPanel buildFormulario() {
         JPanel form = new JPanel() {
             @Override protected void paintComponent(Graphics g) {
@@ -115,17 +136,13 @@ public class CiudadPanel extends JPanel {
         form.setBorder(new EmptyBorder(24, 20, 24, 20));
         form.setPreferredSize(new Dimension(280, 0));
 
-        JLabel titulo = new JLabel("Datos de la ciudad");
+        JLabel titulo = new JLabel("Datos de la posición");
         titulo.setFont(new Font("Segoe UI", Font.BOLD, 15));
         titulo.setForeground(TEXT_PRI);
         titulo.setAlignmentX(LEFT_ALIGNMENT);
 
-        txtNombre = makeTextField();
-
-        cmbPais = new JComboBox<>(new String[]{"Mexico", "USA", "Canada"});
-        cmbPais.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-        cmbPais.setMaximumSize(new Dimension(Integer.MAX_VALUE, 38));
-        cmbPais.setAlignmentX(LEFT_ALIGNMENT);
+        txtNombre      = makeTextField();
+        txtDescripcion = makeTextField();
 
         lblMensaje = new JLabel(" ");
         lblMensaje.setFont(new Font("Segoe UI", Font.PLAIN, 12));
@@ -146,9 +163,9 @@ public class CiudadPanel extends JPanel {
         form.add(Box.createVerticalStrut(6));
         form.add(txtNombre);
         form.add(Box.createVerticalStrut(14));
-        form.add(makeLabel("País anfitrión"));
+        form.add(makeLabel("Descripción"));
         form.add(Box.createVerticalStrut(6));
-        form.add(cmbPais);
+        form.add(txtDescripcion);
         form.add(Box.createVerticalStrut(16));
         form.add(lblMensaje);
         form.add(Box.createVerticalStrut(12));
@@ -160,43 +177,54 @@ public class CiudadPanel extends JPanel {
         return form;
     }
 
+    // -------------------------------------------------------------------------
+    // Lógica CRUD
+    // -------------------------------------------------------------------------
     private void guardar() {
-        String nombre = txtNombre.getText().trim();
-        String pais   = (String) cmbPais.getSelectedItem();
-        if (nombre.isEmpty()) { mostrarMensaje("El nombre es obligatorio.", true); return; }
+        String nombre      = txtNombre.getText().trim();
+        String descripcion = txtDescripcion.getText().trim();
+
+        if (nombre.isEmpty()) {
+            mostrarMensaje("El nombre es obligatorio.", true);
+            return;
+        }
+
         String resultado;
         if (idSeleccionado == -1) {
-            resultado = controller.insertar(new Ciudad(nombre, pais));
+            resultado = controller.insertar(new Posicion(nombre, descripcion));
         } else {
-            resultado = controller.actualizar(new Ciudad(idSeleccionado, nombre, pais));
+            resultado = controller.actualizar(new Posicion(idSeleccionado, nombre, descripcion));
         }
         mostrarMensaje(resultado, resultado.startsWith("Error") || resultado.startsWith("Sin"));
-        cargarTabla(); limpiarFormulario();
+        cargarTabla();
+        limpiarFormulario();
     }
 
     private void eliminar() {
         if (idSeleccionado == -1) return;
-        int c = JOptionPane.showConfirmDialog(this, "¿Eliminar esta ciudad?", "Confirmar", JOptionPane.YES_NO_OPTION);
+        int c = JOptionPane.showConfirmDialog(
+                this, "¿Eliminar esta posición?", "Confirmar", JOptionPane.YES_NO_OPTION);
         if (c != JOptionPane.YES_OPTION) return;
         String resultado = controller.eliminar(idSeleccionado);
         mostrarMensaje(resultado, resultado.startsWith("Error") || resultado.startsWith("Sin"));
-        cargarTabla(); limpiarFormulario();
+        cargarTabla();
+        limpiarFormulario();
     }
 
     private void cargarTabla() {
         modelo.setRowCount(0);
-        for (Ciudad c : controller.listarTodos())
-            modelo.addRow(new Object[]{c.getIdCiudad(), c.getNombre(), c.getPais()});
+        for (Posicion p : controller.listarTodos())
+            modelo.addRow(new Object[]{p.getIdPosicion(), p.getNombre(), p.getDescripcion()});
     }
 
     private void cargarEnFormulario() {
         int fila = tabla.getSelectedRow();
         if (fila == -1) return;
         idSeleccionado = (int) modelo.getValueAt(fila, 0);
-        Ciudad c = controller.buscarPorId(idSeleccionado);
-        if (c == null) return;
-        txtNombre.setText(c.getNombre());
-        cmbPais.setSelectedItem(c.getPais());
+        Posicion p = controller.buscarPorId(idSeleccionado);
+        if (p == null) return;
+        txtNombre.setText(p.getNombre());
+        txtDescripcion.setText(p.getDescripcion());
         btnEliminar.setEnabled(true);
         lblMensaje.setText(" ");
     }
@@ -204,7 +232,7 @@ public class CiudadPanel extends JPanel {
     private void limpiarFormulario() {
         idSeleccionado = -1;
         txtNombre.setText("");
-        cmbPais.setSelectedIndex(0);
+        txtDescripcion.setText("");
         btnEliminar.setEnabled(false);
         lblMensaje.setText(" ");
         tabla.clearSelection();
@@ -215,6 +243,9 @@ public class CiudadPanel extends JPanel {
         lblMensaje.setForeground(esError ? DANGER : new Color(0x0F6E56));
     }
 
+    // -------------------------------------------------------------------------
+    // Helpers de UI
+    // -------------------------------------------------------------------------
     private JLabel makeLabel(String texto) {
         JLabel lbl = new JLabel(texto);
         lbl.setFont(new Font("Segoe UI", Font.PLAIN, 12));
@@ -226,10 +257,12 @@ public class CiudadPanel extends JPanel {
     private JTextField makeTextField() {
         JTextField tf = new JTextField() {
             private boolean focused = false;
-            { addFocusListener(new FocusAdapter() {
-                public void focusGained(FocusEvent e) { focused = true;  repaint(); }
-                public void focusLost (FocusEvent e)  { focused = false; repaint(); }
-            }); }
+            {
+                addFocusListener(new FocusAdapter() {
+                    public void focusGained(FocusEvent e) { focused = true;  repaint(); }
+                    public void focusLost (FocusEvent e)  { focused = false; repaint(); }
+                });
+            }
             @Override protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -237,7 +270,7 @@ public class CiudadPanel extends JPanel {
                 g2.fill(new RoundRectangle2D.Float(0, 0, getWidth(), getHeight(), 8, 8));
                 g2.setColor(focused ? BORDER_F : BORDER_N);
                 g2.setStroke(new BasicStroke(focused ? 1.5f : 1f));
-                g2.draw(new RoundRectangle2D.Float(0.5f, 0.5f, getWidth()-1, getHeight()-1, 8, 8));
+                g2.draw(new RoundRectangle2D.Float(0.5f, 0.5f, getWidth() - 1, getHeight() - 1, 8, 8));
                 g2.dispose();
                 super.paintComponent(g);
             }
@@ -253,10 +286,12 @@ public class CiudadPanel extends JPanel {
     private JButton makeButton(String texto, Color bg, Color hover) {
         JButton btn = new JButton(texto) {
             private boolean hovered = false;
-            { addMouseListener(new MouseAdapter() {
-                public void mouseEntered(MouseEvent e) { hovered = true;  repaint(); }
-                public void mouseExited (MouseEvent e) { hovered = false; repaint(); }
-            }); }
+            {
+                addMouseListener(new MouseAdapter() {
+                    public void mouseEntered(MouseEvent e) { hovered = true;  repaint(); }
+                    public void mouseExited (MouseEvent e) { hovered = false; repaint(); }
+                });
+            }
             @Override protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);

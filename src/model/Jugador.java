@@ -13,7 +13,8 @@ public class Jugador {
     private String nombre;
     private String apellido;
     private Date   fechaNacimiento;
-    private String posicion;
+    private int   idPosicion;    // FK a tabla posicion
+    private String nombrePosicion;     // nombre de la posición (del DAO)
     private double peso;       // en kg
     private double estatura;   // en metros
     private double valor;      // valor en euros
@@ -22,16 +23,17 @@ public class Jugador {
     // Campos extra para mostrar en la vista sin hacer JOIN en Java
     private String nombreEquipo;
     private String nombreConfederacion;
+    private String posicion;
 
     public Jugador() {}
 
     public Jugador(int idJugador, String nombre, String apellido, Date fechaNacimiento,
-                   String posicion, double peso, double estatura, double valor, int idEquipo) {
+                   Posicion posicion, double peso, double estatura, double valor, int idEquipo) {
         this.idJugador       = idJugador;
         this.nombre          = nombre;
         this.apellido        = apellido;
         this.fechaNacimiento = fechaNacimiento;
-        this.posicion        = posicion;
+        this.idPosicion      = posicion.getIdPosicion();
         this.peso            = peso;
         this.estatura        = estatura;
         this.valor           = valor;
@@ -40,11 +42,11 @@ public class Jugador {
 
     // Constructor sin ID (para insertar nuevo registro)
     public Jugador(String nombre, String apellido, Date fechaNacimiento,
-                   String posicion, double peso, double estatura, double valor, int idEquipo) {
+                   int idPosicion, double peso, double estatura, double valor, int idEquipo) {
         this.nombre          = nombre;
         this.apellido        = apellido;
         this.fechaNacimiento = fechaNacimiento;
-        this.posicion        = posicion;
+        this.idPosicion      = idPosicion;
         this.peso            = peso;
         this.estatura        = estatura;
         this.valor           = valor;
@@ -59,8 +61,10 @@ public class Jugador {
     public void   setApellido(String apellido)               { this.apellido = apellido; }
     public Date   getFechaNacimiento()                       { return fechaNacimiento; }
     public void   setFechaNacimiento(Date fechaNacimiento)   { this.fechaNacimiento = fechaNacimiento; }
-    public String getPosicion()                              { return posicion; }
-    public void   setPosicion(String posicion)               { this.posicion = posicion; }
+    public int    getIdPosicion()                    { return idPosicion; }
+    public void   setIdPosicion(int idPosicion)      { this.idPosicion = idPosicion; }
+    public String getNombrePosicion()                { return nombrePosicion; }
+    public void   setNombrePosicion(String nombre)   { this.nombrePosicion = nombre; }
     public double getPeso()                                  { return peso; }
     public void   setPeso(double peso)                       { this.peso = peso; }
     public double getEstatura()                              { return estatura; }

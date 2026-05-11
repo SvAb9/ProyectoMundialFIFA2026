@@ -156,7 +156,7 @@ public class ReporteJugadoresFiltroPanel extends JPanel {
             for (Jugador j : lista) {
                 modelo.addRow(new Object[]{
                         j.getNombre(), j.getApellido(), j.getNombreEquipo(),
-                        j.getPosicion(),
+                        j.getNombrePosicion(),
                         j.getPeso() + " kg",
                         j.getEstatura() + " m",
                         String.format("€ %,.2f", j.getValor())

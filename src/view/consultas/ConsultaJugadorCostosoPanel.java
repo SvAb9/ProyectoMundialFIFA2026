@@ -104,7 +104,7 @@ public class ConsultaJugadorCostosoPanel extends JPanel {
                     j.getNombreConfederacion(),
                     j.getNombre() + " " + j.getApellido(),
                     j.getNombreEquipo(),
-                    j.getPosicion(),
+                    j.getNombrePosicion(),
                     String.format("€ %,.2f", j.getValor())
             });
         }

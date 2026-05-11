@@ -28,7 +28,7 @@ public class JugadorDAO {
             ps.setString(1, j.getNombre());
             ps.setString(2, j.getApellido());
             ps.setDate  (3, new java.sql.Date(j.getFechaNacimiento().getTime()));
-            ps.setString(4, j.getPosicion());
+            ps.setInt(4, j.getIdPosicion()); 
             ps.setDouble(5, j.getPeso());
             ps.setDouble(6, j.getEstatura());
             ps.setDouble(7, j.getValor());
@@ -51,7 +51,7 @@ public class JugadorDAO {
             ps.setString(1, j.getNombre());
             ps.setString(2, j.getApellido());
             ps.setDate  (3, new java.sql.Date(j.getFechaNacimiento().getTime()));
-            ps.setString(4, j.getPosicion());
+            ps.setLong(4, j.getIdPosicion());
             ps.setDouble(5, j.getPeso());
             ps.setDouble(6, j.getEstatura());
             ps.setDouble(7, j.getValor());
@@ -87,17 +87,30 @@ public class JugadorDAO {
                 JOIN confederacion c ON e.id_confederacion = c.id_confederacion
                 ORDER BY j.apellido, j.nombre
                 """;
+        String sql1 = """
+            SELECT j.*, e.nombre AS nombre_equipo,
+                c.nombre AS nombre_confederacion,
+                p.nombre AS nombre_posicion
+            FROM jugador j
+            JOIN equipo e ON j.id_equipo = e.id_equipo
+            JOIN confederacion c ON e.id_confederacion = c.id_confederacion
+            JOIN posicion p ON j.id_posicion = p.id_posicion
+            ORDER BY j.apellido, j.nombre
+            """;
+                
         try (Statement st = conn.createStatement();
              ResultSet rs = st.executeQuery(sql)) {
             while (rs.next()) {
                 Jugador jug = mapear(rs);
                 jug.setNombreEquipo(rs.getString("nombre_equipo"));
                 jug.setNombreConfederacion(rs.getString("nombre_confederacion"));
+                jug.setNombrePosicion(rs.getString("nombre_posicion"));
                 lista.add(jug);
             }
         } catch (SQLException e) {
             System.err.println("Error al listar jugadores: " + e.getMessage());
         }
+       
         return lista;
     }
 
@@ -229,11 +242,12 @@ public class JugadorDAO {
         j.setNombre         (rs.getString("nombre"));
         j.setApellido       (rs.getString("apellido"));
         j.setFechaNacimiento(rs.getDate  ("fecha_nacimiento"));
-        j.setPosicion       (rs.getString("posicion"));
+        j.setIdPosicion(rs.getInt("id_posicion"));
         j.setPeso           (rs.getDouble("peso"));
         j.setEstatura       (rs.getDouble("estatura"));
         j.setValor          (rs.getDouble("valor"));
         j.setIdEquipo       (rs.getInt   ("id_equipo"));
+        
         return j;
     }
 }

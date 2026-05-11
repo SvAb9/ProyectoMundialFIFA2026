@@ -2,8 +2,10 @@ package view.crud;
 
 import controller.JugadorController;
 import dao.EquipoDAO;
+import dao.PosicionDAO;
 import model.Equipo;
 import model.Jugador;
+import model.Posicion;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -39,7 +41,8 @@ public class JugadorPanel extends JPanel {
     // Campos del formulario
     private JTextField        txtNombre, txtApellido, txtFecha;
     private JTextField        txtPeso, txtEstatura, txtValor;
-    private JComboBox<String> cmbPosicion;
+    private JComboBox<Posicion> cmbPosicion;
+    private final PosicionDAO posicionDAO = new PosicionDAO();
     private JComboBox<Equipo> cmbEquipo;
     private JLabel            lblMensaje;
     private JButton           btnGuardar, btnEliminar, btnNuevo;
@@ -135,9 +138,8 @@ public class JugadorPanel extends JPanel {
         txtApellido = makeTextField();
         txtFecha    = makeTextField();  // formato dd/MM/yyyy
 
-        cmbPosicion = new JComboBox<>(new String[]{
-                "Portero", "Defensa", "Centrocampista", "Delantero"
-        });
+        cmbPosicion = new JComboBox<>();
+        for (Posicion p : posicionDAO.listarTodos()) cmbPosicion.addItem(p);
         cmbPosicion.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         cmbPosicion.setMaximumSize(new Dimension(Integer.MAX_VALUE, 38));
         cmbPosicion.setAlignmentX(LEFT_ALIGNMENT);
@@ -248,13 +250,16 @@ public class JugadorPanel extends JPanel {
             mostrarMensaje("Peso, estatura y valor deben ser números.", true); return;
         }
 
-        String posicion = (String) cmbPosicion.getSelectedItem();
+        Posicion posicion = (Posicion) cmbPosicion.getSelectedItem();
 
         String resultado;
         if (idSeleccionado == -1) {
+            // Constructor sin ID: (nombre, apellido, fecha, idPosicion, peso, estatura, valor, idEquipo)
             resultado = controller.insertar(new Jugador(
-                    nombre, apellido, fecha, posicion, peso, estatura, valor, equipo.getIdEquipo()));
+                    nombre, apellido, fecha,
+                    posicion.getIdPosicion(), peso, estatura, valor, equipo.getIdEquipo()));
         } else {
+            // Constructor con ID: (idJugador, nombre, apellido, fecha, posicion, peso, estatura, valor, idEquipo)
             resultado = controller.actualizar(new Jugador(
                     idSeleccionado, nombre, apellido, fecha, posicion, peso, estatura, valor, equipo.getIdEquipo()));
         }
@@ -276,7 +281,7 @@ public class JugadorPanel extends JPanel {
         for (Jugador j : controller.listarTodos())
             modelo.addRow(new Object[]{
                     j.getIdJugador(), j.getNombre(), j.getApellido(),
-                    j.getPosicion(), j.getNombreEquipo(),
+                    j.getIdPosicion(), j.getNombreEquipo(),
                     String.format("%.2f", j.getValor())
             });
     }
@@ -293,7 +298,7 @@ public class JugadorPanel extends JPanel {
         txtPeso.setText(String.valueOf(j.getPeso()));
         txtEstatura.setText(String.valueOf(j.getEstatura()));
         txtValor.setText(String.valueOf(j.getValor()));
-        cmbPosicion.setSelectedItem(j.getPosicion());
+        cmbPosicion.setSelectedItem(j.getIdPosicion());
         for (int i = 0; i < cmbEquipo.getItemCount(); i++) {
             if (cmbEquipo.getItemAt(i).getIdEquipo() == j.getIdEquipo()) {
                 cmbEquipo.setSelectedIndex(i); break;

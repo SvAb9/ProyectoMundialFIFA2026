@@ -62,7 +62,7 @@ public class UsuarioPanel extends JPanel {
         if (!SessionManager.esAdmin()) {
             setLayout(new GridBagLayout());
             setBackground(BG);
-            JLabel lbl = new JLabel("⛔ Acceso denegado. Solo el administrador puede gestionar usuarios.");
+            JLabel lbl = new JLabel("Acceso denegado. Solo el administrador puede gestionar usuarios.");
             lbl.setFont(new Font("Segoe UI", Font.BOLD, 14));
             lbl.setForeground(DANGER);
             add(lbl);
@@ -94,7 +94,7 @@ public class UsuarioPanel extends JPanel {
         sub.setForeground(TEXT_SEC);
 
         // Badge de advertencia
-        JLabel badge = new JLabel("  🔒 Área restringida — ADMIN  ");
+        JLabel badge = new JLabel("  Area restringida — ADMIN  ");
         badge.setFont(new Font("Segoe UI", Font.BOLD, 11));
         badge.setForeground(Color.WHITE);
         badge.setBackground(DANGER);
@@ -212,7 +212,7 @@ public class UsuarioPanel extends JPanel {
         txtPassword.setAlignmentX(LEFT_ALIGNMENT);
 
         // Botón mostrar/ocultar contraseña
-        chkMostrarPass = new JButton("👁 Mostrar") {
+        chkMostrarPass = new JButton("Mostrar") {
             @Override protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setColor(new Color(0xEEECE6));
@@ -232,10 +232,10 @@ public class UsuarioPanel extends JPanel {
         chkMostrarPass.addActionListener(e -> {
             if (txtPassword.getEchoChar() == '•') {
                 txtPassword.setEchoChar((char) 0);
-                chkMostrarPass.setText("🙈 Ocultar");
+                chkMostrarPass.setText("Ocultar");
             } else {
                 txtPassword.setEchoChar('•');
-                chkMostrarPass.setText("👁 Mostrar");
+                chkMostrarPass.setText("Mostrar");
             }
         });
 
@@ -448,7 +448,7 @@ public class UsuarioPanel extends JPanel {
         txtUsername.setText("");
         txtPassword.setText("");
         txtPassword.setEchoChar('•');
-        chkMostrarPass.setText("👁 Mostrar");
+        chkMostrarPass.setText("Mostrar");
         cmbRol.setSelectedIndex(0);
         cmbRol.setEnabled(true);
         chkActivo.setSelected(true);

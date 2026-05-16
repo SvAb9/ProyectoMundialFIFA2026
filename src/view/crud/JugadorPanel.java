@@ -16,10 +16,7 @@ import java.awt.geom.RoundRectangle2D;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
-/**
- * JugadorPanel - CRUD de jugadores.
- * Es el panel más completo porque tiene más campos.
- */
+
 public class JugadorPanel extends JPanel {
 
     private static final Color BG       = new Color(0xF5F5F2);
@@ -139,10 +136,10 @@ public class JugadorPanel extends JPanel {
         txtFecha    = makeTextField();  // formato dd/MM/yyyy
 
         cmbPosicion = new JComboBox<>();
-        for (Posicion p : posicionDAO.listarTodos()) cmbPosicion.addItem(p);
         cmbPosicion.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         cmbPosicion.setMaximumSize(new Dimension(Integer.MAX_VALUE, 38));
         cmbPosicion.setAlignmentX(LEFT_ALIGNMENT);
+        cargarPosiciones();
 
         txtPeso     = makeTextField();
         txtEstatura = makeTextField();
@@ -220,6 +217,23 @@ public class JugadorPanel extends JPanel {
 
         form.add(scroll);
         return form;
+    }
+
+    private void cargarPosiciones() {
+        cmbPosicion.removeAllItems();
+        java.util.List<Posicion> posiciones = posicionDAO.listarTodos();
+        if (posiciones.isEmpty()) {
+            // Fallback: posiciones base para que el combo nunca quede vacio
+            cmbPosicion.addItem(new Posicion(1, "Portero",        "Guarda la porteria"));
+            cmbPosicion.addItem(new Posicion(2, "Defensa",        "Defiende el area propia"));
+            cmbPosicion.addItem(new Posicion(3, "Centrocampista", "Controla el medio del campo"));
+            cmbPosicion.addItem(new Posicion(4, "Delantero",      "Ataca y genera goles"));
+            System.err.println("[JugadorPanel] AVISO: posicionDAO devolvio lista vacia. " +
+                    "Verifique la conexion a BD. Se usaron posiciones por defecto.");
+        } else {
+            for (Posicion p : posiciones) cmbPosicion.addItem(p);
+        }
+        if (cmbPosicion.getItemCount() > 0) cmbPosicion.setSelectedIndex(0);
     }
 
     private void guardar() {

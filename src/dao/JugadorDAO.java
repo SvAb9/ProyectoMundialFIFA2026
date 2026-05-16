@@ -24,7 +24,7 @@ public class JugadorDAO {
             ps.setString(1, j.getNombre());
             ps.setString(2, j.getApellido());
             ps.setDate  (3, new java.sql.Date(j.getFechaNacimiento().getTime()));
-            ps.setInt   (4, j.getIdPosicion());
+            ps.setInt(4, j.getIdPosicion());
             ps.setDouble(5, j.getPeso());
             ps.setDouble(6, j.getEstatura());
             ps.setDouble(7, j.getValor());
@@ -76,15 +76,16 @@ public class JugadorDAO {
     public List<Jugador> listarTodos() {
         List<Jugador> lista = new ArrayList<>();
         String sql = """
-                SELECT j.*, e.nombre AS nombre_equipo,
-                       c.nombre AS nombre_confederacion,
-                       p.nombre AS nombre_posicion
-                FROM jugador j
-                JOIN equipo        e ON j.id_equipo   = e.id_equipo
-                JOIN confederacion c ON e.id_confederacion = c.id_confederacion
-                JOIN posicion      p ON j.id_posicion  = p.id_posicion
-                ORDER BY j.apellido, j.nombre
-                """;
+            SELECT j.*, e.nombre AS nombre_equipo,
+                c.nombre AS nombre_confederacion,
+                p.nombre AS nombre_posicion
+            FROM jugador j
+            JOIN equipo e ON j.id_equipo = e.id_equipo
+            JOIN confederacion c ON e.id_confederacion = c.id_confederacion
+            LEFT JOIN posicion p ON j.id_posicion = p.id_posicion
+            ORDER BY j.apellido, j.nombre
+            """;
+
         try (Statement st = conn.createStatement();
              ResultSet rs = st.executeQuery(sql)) {
             while (rs.next()) {
@@ -97,6 +98,7 @@ public class JugadorDAO {
         } catch (SQLException e) {
             System.err.println("Error al listar jugadores: " + e.getMessage());
         }
+
         return lista;
     }
 
@@ -201,10 +203,10 @@ public class JugadorDAO {
                        c.nombre AS nombre_confederacion,
                        p.nombre AS nombre_posicion
                 FROM jugador j
-                JOIN equipo        e ON j.id_equipo        = e.id_equipo
-                JOIN confederacion c ON e.id_confederacion  = c.id_confederacion
-                JOIN posicion      p ON j.id_posicion       = p.id_posicion
-                WHERE j.peso     BETWEEN ? AND ?
+                JOIN equipo e ON j.id_equipo = e.id_equipo
+                JOIN confederacion c ON e.id_confederacion = c.id_confederacion
+                LEFT JOIN posicion p ON j.id_posicion = p.id_posicion
+                WHERE j.peso BETWEEN ? AND ?
                   AND j.estatura BETWEEN ? AND ?
                   AND (? = 0 OR j.id_equipo = ?)
                 ORDER BY j.apellido
@@ -242,6 +244,7 @@ public class JugadorDAO {
         j.setEstatura       (rs.getDouble("estatura"));
         j.setValor          (rs.getDouble("valor"));
         j.setIdEquipo       (rs.getInt   ("id_equipo"));
+
         return j;
     }
 }

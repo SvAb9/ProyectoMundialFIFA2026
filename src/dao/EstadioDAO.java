@@ -58,9 +58,10 @@ public class EstadioDAO {
     public List<Estadio> listarTodos() {
         List<Estadio> lista = new ArrayList<>();
         String sql = """
-                SELECT es.*, c.nombre AS nombre_ciudad, c.pais AS pais_ciudad
+                SELECT es.*, c.nombre AS nombre_ciudad, pa.nombre AS pais_ciudad
                 FROM estadio es
                 JOIN ciudad c ON es.id_ciudad = c.id_ciudad
+                JOIN pais pa ON c.id_pais = pa.id_pais
                 ORDER BY es.nombre
                 """;
         try (Statement st = conn.createStatement();

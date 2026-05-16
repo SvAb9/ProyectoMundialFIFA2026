@@ -5,10 +5,6 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * GrupoDAO - Maneja todas las operaciones de la tabla GRUPO.
- * Los 12 grupos (A-L) de la fase de grupos del mundial.
- */
 public class GrupoDAO {
 
     private final Connection conn;
@@ -75,7 +71,32 @@ public class GrupoDAO {
         return null;
     }
 
-    // ── Agregar equipo a grupo (tabla intermedia equipo_grupo) ────────────
+    /** Retorna los equipos que pertenecen a un grupo: nombre equipo + confederacion */
+    public List<String[]> listarEquiposPorGrupo(int idGrupo) {
+        List<String[]> lista = new ArrayList<>();
+        String sql = """
+                SELECT e.nombre AS equipo, c.nombre AS confederacion
+                FROM equipo_grupo eg
+                JOIN equipo e        ON eg.id_equipo        = e.id_equipo
+                JOIN confederacion c ON e.id_confederacion  = c.id_confederacion
+                WHERE eg.id_grupo = ?
+                ORDER BY e.nombre
+                """;
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, idGrupo);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                lista.add(new String[]{
+                    rs.getString("equipo"),
+                    rs.getString("confederacion")
+                });
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al listar equipos del grupo: " + e.getMessage());
+        }
+        return lista;
+    }
+
     public boolean agregarEquipo(int idEquipo, int idGrupo) {
         String sql = "INSERT INTO equipo_grupo (id_equipo, id_grupo) VALUES (?, ?)";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {

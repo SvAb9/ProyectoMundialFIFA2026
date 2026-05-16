@@ -263,8 +263,14 @@ public class JugadorPanel extends JPanel {
             resultado = controller.actualizar(new Jugador(
                     idSeleccionado, nombre, apellido, fecha, posicion, peso, estatura, valor, equipo.getIdEquipo()));
         }
-        mostrarMensaje(resultado, resultado.startsWith("Error") || resultado.startsWith("Sin"));
-        cargarTabla(); limpiarFormulario();
+        boolean esError = resultado.startsWith("Error") || resultado.startsWith("Sin");
+        mostrarMensaje(resultado, esError);
+        if (esError) {
+            JOptionPane.showMessageDialog(this, resultado, "No se pudo guardar el jugador", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        cargarTabla();
+        limpiarFormulario();
     }
 
     private void eliminar() {
@@ -272,8 +278,14 @@ public class JugadorPanel extends JPanel {
         int c = JOptionPane.showConfirmDialog(this, "¿Eliminar este jugador?", "Confirmar", JOptionPane.YES_NO_OPTION);
         if (c != JOptionPane.YES_OPTION) return;
         String resultado = controller.eliminar(idSeleccionado);
-        mostrarMensaje(resultado, resultado.startsWith("Error") || resultado.startsWith("Sin"));
-        cargarTabla(); limpiarFormulario();
+        boolean esErrorElim = resultado.startsWith("Error") || resultado.startsWith("Sin");
+        mostrarMensaje(resultado, esErrorElim);
+        if (esErrorElim) {
+            JOptionPane.showMessageDialog(this, resultado, "No se pudo eliminar el jugador", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        cargarTabla();
+        limpiarFormulario();
     }
 
     private void cargarTabla() {

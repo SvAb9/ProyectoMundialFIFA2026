@@ -230,7 +230,12 @@ public class EquipoPanel extends JPanel {
             resultado = controller.actualizar(e);
         }
 
-        mostrarMensaje(resultado, resultado.startsWith("Error") || resultado.startsWith("Sin"));
+        boolean esError = resultado.startsWith("Error") || resultado.startsWith("Sin");
+        mostrarMensaje(resultado, esError);
+        if (esError) {
+            JOptionPane.showMessageDialog(this, resultado, "No se pudo guardar el equipo", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
         cargarTabla();
         limpiarFormulario();
     }
@@ -242,7 +247,12 @@ public class EquipoPanel extends JPanel {
         if (confirm != JOptionPane.YES_OPTION) return;
 
         String resultado = controller.eliminar(idSeleccionado);
-        mostrarMensaje(resultado, resultado.startsWith("Error") || resultado.startsWith("Sin"));
+        boolean esErrorElim = resultado.startsWith("Error") || resultado.startsWith("Sin");
+        mostrarMensaje(resultado, esErrorElim);
+        if (esErrorElim) {
+            JOptionPane.showMessageDialog(this, resultado, "No se pudo eliminar el equipo", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
         cargarTabla();
         limpiarFormulario();
     }

@@ -182,7 +182,12 @@ public class CiudadPanel extends JPanel {
         } else {
             resultado = controller.actualizar(new Ciudad(idSeleccionado, nombre, paisSel.getIdPais(), paisSel.getNombre()));
         }
-        mostrarMensaje(resultado, resultado.startsWith("Error") || resultado.startsWith("Sin"));
+        boolean esError = resultado.startsWith("Error") || resultado.startsWith("Sin");
+        mostrarMensaje(resultado, esError);
+        if (esError) {
+            JOptionPane.showMessageDialog(this, resultado, "No se pudo guardar el ciudad", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
         cargarTabla();
         limpiarFormulario();
     }
@@ -192,7 +197,12 @@ public class CiudadPanel extends JPanel {
         int c = JOptionPane.showConfirmDialog(this, "¿Eliminar esta ciudad?", "Confirmar", JOptionPane.YES_NO_OPTION);
         if (c != JOptionPane.YES_OPTION) return;
         String resultado = controller.eliminar(idSeleccionado);
-        mostrarMensaje(resultado, resultado.startsWith("Error") || resultado.startsWith("Sin"));
+        boolean esErrorElim = resultado.startsWith("Error") || resultado.startsWith("Sin");
+        mostrarMensaje(resultado, esErrorElim);
+        if (esErrorElim) {
+            JOptionPane.showMessageDialog(this, resultado, "No se pudo eliminar el ciudad", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
         cargarTabla();
         limpiarFormulario();
     }

@@ -1,6 +1,7 @@
 package view.crud;
 
 import controller.GrupoController;
+import dao.GrupoDAO;
 import model.Grupo;
 
 import javax.swing.*;
@@ -9,10 +10,8 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.RoundRectangle2D;
+import java.util.List;
 
-/**
- * GrupoPanel - CRUD de grupos (A-L).
- */
 public class GrupoPanel extends JPanel {
 
     private static final Color BG       = new Color(0xF5F5F2);
@@ -27,13 +26,16 @@ public class GrupoPanel extends JPanel {
     private static final Color TH_BG    = new Color(0xF1EFE8);
     private static final Color SEL_BG   = new Color(0xE6F1FB);
 
-    private JTable              tabla;
-    private DefaultTableModel   modelo;
-    private JComboBox<String>   cmbNombre;
-    private JLabel              lblMensaje;
-    private JButton             btnGuardar, btnEliminar, btnNuevo;
+    private JTable            tabla;
+    private DefaultTableModel modelo;
+    private JTable            tablaEquipos;
+    private DefaultTableModel modeloEquipos;
+    private JComboBox<String> cmbNombre;
+    private JLabel            lblMensaje;
+    private JButton           btnGuardar, btnEliminar, btnNuevo;
 
     private final GrupoController controller = new GrupoController();
+    private final GrupoDAO        grupoDAO   = new GrupoDAO();
     private int idSeleccionado = -1;
 
     public GrupoPanel() {
@@ -41,7 +43,7 @@ public class GrupoPanel extends JPanel {
         setBackground(BG);
         setBorder(new EmptyBorder(20, 20, 20, 20));
         add(buildHeader(),     BorderLayout.NORTH);
-        add(buildTabla(),      BorderLayout.CENTER);
+        add(buildCentro(),     BorderLayout.CENTER);
         add(buildFormulario(), BorderLayout.EAST);
         cargarTabla();
     }
@@ -52,7 +54,7 @@ public class GrupoPanel extends JPanel {
         JLabel t = new JLabel("Grupos");
         t.setFont(new Font("Segoe UI", Font.BOLD, 20));
         t.setForeground(TEXT_PRI);
-        JLabel s = new JLabel("12 grupos de la fase de grupos (A-L)");
+        JLabel s = new JLabel("12 grupos de la fase de grupos (A-L) — selecciona un grupo para ver sus equipos");
         s.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         s.setForeground(TEXT_SEC);
         JPanel tp = new JPanel();
@@ -63,7 +65,16 @@ public class GrupoPanel extends JPanel {
         return p;
     }
 
-    private JScrollPane buildTabla() {
+    /** Panel central: tabla de grupos arriba + tabla de equipos del grupo abajo */
+    private JPanel buildCentro() {
+        JPanel p = new JPanel(new GridLayout(2, 1, 0, 12));
+        p.setBackground(BG);
+        p.add(buildTablaGrupos());
+        p.add(buildTablaEquipos());
+        return p;
+    }
+
+    private JScrollPane buildTablaGrupos() {
         modelo = new DefaultTableModel(new String[]{"ID", "Grupo"}, 0) {
             @Override public boolean isCellEditable(int r, int c) { return false; }
         };
@@ -88,12 +99,75 @@ public class GrupoPanel extends JPanel {
         tabla.getColumnModel().getColumn(0).setMaxWidth(0);
         tabla.getColumnModel().getColumn(0).setWidth(0);
         tabla.getSelectionModel().addListSelectionListener(e -> {
-            if (!e.getValueIsAdjusting()) cargarEnFormulario();
+            if (!e.getValueIsAdjusting()) {
+                cargarEnFormulario();
+                cargarEquiposDelGrupo();
+            }
         });
         JScrollPane scroll = new JScrollPane(tabla);
         scroll.setBorder(BorderFactory.createLineBorder(BORDER_N, 1, true));
         scroll.getViewport().setBackground(CARD);
         return scroll;
+    }
+
+    private JScrollPane buildTablaEquipos() {
+        modeloEquipos = new DefaultTableModel(
+                new String[]{"Equipo", "Confederación"}, 0) {
+            @Override public boolean isCellEditable(int r, int c) { return false; }
+        };
+        tablaEquipos = new JTable(modeloEquipos) {
+            @Override public Component prepareRenderer(
+                    javax.swing.table.TableCellRenderer r, int row, int col) {
+                Component c = super.prepareRenderer(r, row, col);
+                c.setBackground(isRowSelected(row) ? SEL_BG : (row % 2 == 0 ? CARD : new Color(0xFAFAF8)));
+                c.setForeground(TEXT_PRI);
+                return c;
+            }
+        };
+        tablaEquipos.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        tablaEquipos.setRowHeight(32);
+        tablaEquipos.setShowGrid(false);
+        tablaEquipos.setIntercellSpacing(new Dimension(0, 0));
+        tablaEquipos.setFocusable(false);
+        tablaEquipos.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 12));
+        tablaEquipos.getTableHeader().setBackground(TH_BG);
+        tablaEquipos.getTableHeader().setForeground(TEXT_SEC);
+
+        JScrollPane scroll = new JScrollPane(tablaEquipos);
+        scroll.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(BORDER_N, 1, true),
+            BorderFactory.createEmptyBorder(0, 0, 0, 0)
+        ));
+        scroll.getViewport().setBackground(CARD);
+
+        // Etiqueta encima de la tabla de equipos
+        JPanel wrapper = new JPanel(new BorderLayout(0, 6));
+        wrapper.setBackground(BG);
+        JLabel lbl = new JLabel("Equipos del grupo seleccionado");
+        lbl.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        lbl.setForeground(TEXT_SEC);
+        wrapper.add(lbl,    BorderLayout.NORTH);
+        wrapper.add(scroll, BorderLayout.CENTER);
+
+        // Envolver en un JScrollPane para que buildCentro lo agregue directo
+        JPanel outer = new JPanel(new BorderLayout());
+        outer.setBackground(BG);
+        outer.add(wrapper);
+        return new JScrollPane(outer) {{
+            setBorder(null);
+            setOpaque(false);
+            getViewport().setOpaque(false);
+        }};
+    }
+
+    private void cargarEquiposDelGrupo() {
+        modeloEquipos.setRowCount(0);
+        int fila = tabla.getSelectedRow();
+        if (fila == -1) return;
+        int id = (int) modelo.getValueAt(fila, 0);
+        List<String[]> equipos = grupoDAO.listarEquiposPorGrupo(id);
+        for (String[] eq : equipos)
+            modeloEquipos.addRow(new Object[]{eq[0], eq[1]});
     }
 
     private JPanel buildFormulario() {
@@ -194,6 +268,7 @@ public class GrupoPanel extends JPanel {
         btnEliminar.setEnabled(false);
         lblMensaje.setText(" ");
         tabla.clearSelection();
+        modeloEquipos.setRowCount(0);
     }
 
     private void mostrarMensaje(String msg, boolean esError) {

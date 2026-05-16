@@ -357,7 +357,12 @@ public class UsuarioPanel extends JPanel {
             resultado = controller.actualizar(u);
         }
 
-        mostrarMensaje(resultado, resultado.startsWith("Error") || resultado.startsWith("Sin"));
+        boolean esError = resultado.startsWith("Error") || resultado.startsWith("Sin");
+        mostrarMensaje(resultado, esError);
+        if (esError) {
+            JOptionPane.showMessageDialog(this, resultado, "No se pudo guardar el usuario", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
         cargarTabla();
         limpiarFormulario();
     }
@@ -387,7 +392,12 @@ public class UsuarioPanel extends JPanel {
         if (confirm != JOptionPane.YES_OPTION) return;
 
         String resultado = controller.desactivar(idSeleccionado);
-        mostrarMensaje(resultado, resultado.startsWith("Error") || resultado.startsWith("Sin"));
+        boolean esErrorElim = resultado.startsWith("Error") || resultado.startsWith("Sin");
+        mostrarMensaje(resultado, esErrorElim);
+        if (esErrorElim) {
+            JOptionPane.showMessageDialog(this, resultado, "No se pudo eliminar el usuario", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
         cargarTabla();
         limpiarFormulario();
     }

@@ -46,7 +46,7 @@ public class ConsultaMenores21Panel extends JPanel {
         JLabel t = new JLabel("Jugadores menores de 21 años por equipo");
         t.setFont(new Font("Segoe UI", Font.BOLD, 20));
         t.setForeground(TEXT_PRI);
-        JLabel s = new JLabel("Cantidad de jugadores sub-21 en cada selección");
+        JLabel s = new JLabel("Jugadores menores de 21 años al inicio del mundial (11/06/2026)");
         s.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         s.setForeground(TEXT_SEC);
         JPanel tp = new JPanel();
@@ -59,7 +59,7 @@ public class ConsultaMenores21Panel extends JPanel {
 
     private JScrollPane buildTabla() {
         modelo = new DefaultTableModel(
-                new String[]{"Equipo", "Jugadores menores de 21"}, 0) {
+                new String[]{"Equipo", "Cantidad", "Jugadores"}, 0) {
             @Override public boolean isCellEditable(int r, int c) { return false; }
         };
         tabla = new JTable(modelo) {
@@ -99,7 +99,7 @@ public class ConsultaMenores21Panel extends JPanel {
         modelo.setRowCount(0);
         List<String[]> lista = controller.jugadoresMenores21PorEquipo();
         for (String[] fila : lista) {
-            modelo.addRow(new Object[]{fila[0], fila[1]});
+            modelo.addRow(new Object[]{fila[0], fila[1], fila[2]});
         }
         if (lista.isEmpty()) {
             modelo.addRow(new Object[]{"Sin datos", "0"});

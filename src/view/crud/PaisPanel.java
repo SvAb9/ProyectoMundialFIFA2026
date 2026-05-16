@@ -1,8 +1,6 @@
 package view.crud;
 
-import controller.CiudadController;
 import controller.PaisController;
-import model.Ciudad;
 import model.Pais;
 
 import javax.swing.*;
@@ -11,13 +9,12 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.RoundRectangle2D;
-import java.util.List;
 
 /**
- * CiudadPanel - CRUD de ciudades sede.
- * Actualizado: el combobox de país ahora carga los países desde la BD (tabla PAIS).
+ * PaisPanel - CRUD de países anfitriones del mundial.
+ * Mismo estilo visual que el resto de paneles del proyecto.
  */
-public class CiudadPanel extends JPanel {
+public class PaisPanel extends JPanel {
 
     private static final Color BG       = new Color(0xF5F5F2);
     private static final Color CARD     = Color.WHITE;
@@ -32,18 +29,17 @@ public class CiudadPanel extends JPanel {
     private static final Color TH_BG    = new Color(0xF1EFE8);
     private static final Color SEL_BG   = new Color(0xE6F1FB);
 
-    private JTable              tabla;
-    private DefaultTableModel   modelo;
-    private JTextField          txtNombre;
-    private JComboBox<Pais>     cmbPais;
-    private JLabel              lblMensaje;
-    private JButton             btnGuardar, btnEliminar, btnNuevo;
+    private JTable            tabla;
+    private DefaultTableModel modelo;
+    private JTextField        txtNombre;
+    private JTextField        txtCodigoIso;
+    private JLabel            lblMensaje;
+    private JButton           btnGuardar, btnEliminar, btnNuevo;
 
-    private final CiudadController controller = new CiudadController();
-    private final PaisController   paisCtrl   = new PaisController();
+    private final PaisController controller = new PaisController();
     private int idSeleccionado = -1;
 
-    public CiudadPanel() {
+    public PaisPanel() {
         setLayout(new BorderLayout(16, 16));
         setBackground(BG);
         setBorder(new EmptyBorder(20, 20, 20, 20));
@@ -56,10 +52,10 @@ public class CiudadPanel extends JPanel {
     private JPanel buildHeader() {
         JPanel p = new JPanel(new BorderLayout());
         p.setBackground(BG);
-        JLabel t = new JLabel("Ciudades");
+        JLabel t = new JLabel("Países");
         t.setFont(new Font("Segoe UI", Font.BOLD, 20));
         t.setForeground(TEXT_PRI);
-        JLabel s = new JLabel("Ciudades sede del mundial");
+        JLabel s = new JLabel("Países anfitriones del Mundial FIFA 2026");
         s.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         s.setForeground(TEXT_SEC);
         JPanel tp = new JPanel();
@@ -71,7 +67,7 @@ public class CiudadPanel extends JPanel {
     }
 
     private JScrollPane buildTabla() {
-        modelo = new DefaultTableModel(new String[]{"ID", "Nombre", "País"}, 0) {
+        modelo = new DefaultTableModel(new String[]{"ID", "Nombre", "Código ISO"}, 0) {
             @Override public boolean isCellEditable(int r, int c) { return false; }
         };
         tabla = new JTable(modelo) {
@@ -92,6 +88,7 @@ public class CiudadPanel extends JPanel {
         tabla.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 12));
         tabla.getTableHeader().setBackground(TH_BG);
         tabla.getTableHeader().setForeground(TEXT_SEC);
+        // Ocultar columna ID
         tabla.getColumnModel().getColumn(0).setMinWidth(0);
         tabla.getColumnModel().getColumn(0).setMaxWidth(0);
         tabla.getColumnModel().getColumn(0).setWidth(0);
@@ -119,19 +116,13 @@ public class CiudadPanel extends JPanel {
         form.setBorder(new EmptyBorder(24, 20, 24, 20));
         form.setPreferredSize(new Dimension(280, 0));
 
-        JLabel titulo = new JLabel("Datos de la ciudad");
+        JLabel titulo = new JLabel("Datos del país");
         titulo.setFont(new Font("Segoe UI", Font.BOLD, 15));
         titulo.setForeground(TEXT_PRI);
         titulo.setAlignmentX(LEFT_ALIGNMENT);
 
-        txtNombre = makeTextField();
-
-        // Combobox cargado desde la BD
-        cmbPais = new JComboBox<>();
-        cargarPaisesEnCombo();
-        cmbPais.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-        cmbPais.setMaximumSize(new Dimension(Integer.MAX_VALUE, 38));
-        cmbPais.setAlignmentX(LEFT_ALIGNMENT);
+        txtNombre     = makeTextField();
+        txtCodigoIso  = makeTextField();
 
         lblMensaje = new JLabel(" ");
         lblMensaje.setFont(new Font("Segoe UI", Font.PLAIN, 12));
@@ -152,9 +143,9 @@ public class CiudadPanel extends JPanel {
         form.add(Box.createVerticalStrut(6));
         form.add(txtNombre);
         form.add(Box.createVerticalStrut(14));
-        form.add(makeLabel("País anfitrión"));
+        form.add(makeLabel("Código ISO (ej: MEX, USA, CAN)"));
         form.add(Box.createVerticalStrut(6));
-        form.add(cmbPais);
+        form.add(txtCodigoIso);
         form.add(Box.createVerticalStrut(16));
         form.add(lblMensaje);
         form.add(Box.createVerticalStrut(12));
@@ -166,21 +157,14 @@ public class CiudadPanel extends JPanel {
         return form;
     }
 
-    private void cargarPaisesEnCombo() {
-        cmbPais.removeAllItems();
-        List<Pais> paises = paisCtrl.listarTodos();
-        for (Pais p : paises) cmbPais.addItem(p);
-    }
-
     private void guardar() {
-        String nombre = txtNombre.getText().trim();
-        Pais paisSel  = (Pais) cmbPais.getSelectedItem();
-        if (paisSel == null) { mostrarMensaje("Selecciona un país.", true); return; }
+        String nombre    = txtNombre.getText().trim();
+        String codigoIso = txtCodigoIso.getText().trim().toUpperCase();
         String resultado;
         if (idSeleccionado == -1) {
-            resultado = controller.insertar(new Ciudad(nombre, paisSel.getIdPais()));
+            resultado = controller.insertar(new Pais(nombre, codigoIso));
         } else {
-            resultado = controller.actualizar(new Ciudad(idSeleccionado, nombre, paisSel.getIdPais(), paisSel.getNombre()));
+            resultado = controller.actualizar(new Pais(idSeleccionado, nombre, codigoIso));
         }
         mostrarMensaje(resultado, resultado.startsWith("Error") || resultado.startsWith("Sin"));
         cargarTabla();
@@ -189,7 +173,9 @@ public class CiudadPanel extends JPanel {
 
     private void eliminar() {
         if (idSeleccionado == -1) return;
-        int c = JOptionPane.showConfirmDialog(this, "¿Eliminar esta ciudad?", "Confirmar", JOptionPane.YES_NO_OPTION);
+        int c = JOptionPane.showConfirmDialog(this,
+                "¿Eliminar este país? Se eliminarán también sus ciudades asociadas.",
+                "Confirmar", JOptionPane.YES_NO_OPTION);
         if (c != JOptionPane.YES_OPTION) return;
         String resultado = controller.eliminar(idSeleccionado);
         mostrarMensaje(resultado, resultado.startsWith("Error") || resultado.startsWith("Sin"));
@@ -199,24 +185,18 @@ public class CiudadPanel extends JPanel {
 
     private void cargarTabla() {
         modelo.setRowCount(0);
-        for (Ciudad c : controller.listarTodos())
-            modelo.addRow(new Object[]{c.getIdCiudad(), c.getNombre(), c.getNombrePais()});
+        for (Pais p : controller.listarTodos())
+            modelo.addRow(new Object[]{p.getIdPais(), p.getNombre(), p.getCodigoIso()});
     }
 
     private void cargarEnFormulario() {
         int fila = tabla.getSelectedRow();
         if (fila == -1) return;
         idSeleccionado = (int) modelo.getValueAt(fila, 0);
-        Ciudad c = controller.buscarPorId(idSeleccionado);
-        if (c == null) return;
-        txtNombre.setText(c.getNombre());
-        // Seleccionar el país correspondiente en el combo
-        for (int i = 0; i < cmbPais.getItemCount(); i++) {
-            if (cmbPais.getItemAt(i).getIdPais() == c.getIdPais()) {
-                cmbPais.setSelectedIndex(i);
-                break;
-            }
-        }
+        Pais p = controller.buscarPorId(idSeleccionado);
+        if (p == null) return;
+        txtNombre.setText(p.getNombre());
+        txtCodigoIso.setText(p.getCodigoIso());
         btnEliminar.setEnabled(true);
         lblMensaje.setText(" ");
     }
@@ -224,7 +204,7 @@ public class CiudadPanel extends JPanel {
     private void limpiarFormulario() {
         idSeleccionado = -1;
         txtNombre.setText("");
-        if (cmbPais.getItemCount() > 0) cmbPais.setSelectedIndex(0);
+        txtCodigoIso.setText("");
         btnEliminar.setEnabled(false);
         lblMensaje.setText(" ");
         tabla.clearSelection();

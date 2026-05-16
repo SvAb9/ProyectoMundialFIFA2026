@@ -107,6 +107,7 @@ public class MenuPrincipalFrame extends JFrame {
             sidebar.add(makeNavButton("Equipos",         "equipos"));
             sidebar.add(makeNavButton("Jugadores",       "jugadores"));
             sidebar.add(makeNavButton("Dir. Tecnicos",   "directores"));
+            sidebar.add(makeNavButton("Países",          "paises"));
             sidebar.add(makeNavButton("Ciudades",        "ciudades"));
             sidebar.add(makeNavButton("Estadios",        "estadios"));
             sidebar.add(makeNavButton("Grupos",          "grupos"));
@@ -323,6 +324,7 @@ public class MenuPrincipalFrame extends JFrame {
         JPanel panel = switch (seccion) {
             case "equipos"            -> new EquipoPanel();
             case "confederaciones"    -> new ConfederacionPanel();
+            case "paises"             -> new PaisPanel();
             case "ciudades"           -> new CiudadPanel();
             case "estadios"           -> new EstadioPanel();
             case "grupos"             -> new GrupoPanel();

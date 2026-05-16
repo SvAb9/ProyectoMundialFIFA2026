@@ -110,12 +110,14 @@ public class EquipoDAO {
                     SELECT DISTINCT p.id_equipo_local FROM partido p
                     JOIN estadio es ON p.id_estadio = es.id_estadio
                     JOIN ciudad ci ON es.id_ciudad = ci.id_ciudad
-                    WHERE ci.pais = ?
+                    JOIN pais pa ON ci.id_pais = pa.id_pais
+                    WHERE pa.nombre = ?
                     UNION
                     SELECT DISTINCT p.id_equipo_visitante FROM partido p
                     JOIN estadio es ON p.id_estadio = es.id_estadio
                     JOIN ciudad ci ON es.id_ciudad = ci.id_ciudad
-                    WHERE ci.pais = ?
+                    JOIN pais pa ON ci.id_pais = pa.id_pais
+                    WHERE pa.nombre = ?
                 )
                 AND e.valor_total = (
                     SELECT MAX(e2.valor_total)
@@ -124,12 +126,14 @@ public class EquipoDAO {
                         SELECT DISTINCT p2.id_equipo_local FROM partido p2
                         JOIN estadio es2 ON p2.id_estadio = es2.id_estadio
                         JOIN ciudad ci2 ON es2.id_ciudad = ci2.id_ciudad
-                        WHERE ci2.pais = ?
+                        JOIN pais pa2 ON ci2.id_pais = pa2.id_pais
+                        WHERE pa2.nombre = ?
                         UNION
                         SELECT DISTINCT p2.id_equipo_visitante FROM partido p2
                         JOIN estadio es2 ON p2.id_estadio = es2.id_estadio
                         JOIN ciudad ci2 ON es2.id_ciudad = ci2.id_ciudad
-                        WHERE ci2.pais = ?
+                        JOIN pais pa2 ON ci2.id_pais = pa2.id_pais
+                        WHERE pa2.nombre = ?
                     )
                 )
                 """;

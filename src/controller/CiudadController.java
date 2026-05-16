@@ -1,7 +1,7 @@
 package controller;
 
-import dao.*;
-import model.*;
+import dao.CiudadDAO;
+import model.Ciudad;
 import util.SessionManager;
 import java.util.List;
 
@@ -12,12 +12,14 @@ public class CiudadController {
     public String insertar(Ciudad c) {
         if (!SessionManager.puedeCRUD()) return "Sin permisos para esta acción.";
         if (c.getNombre().isBlank())      return "El nombre es obligatorio.";
-        if (c.getPais().isBlank())        return "Selecciona un país.";
+        if (c.getIdPais() <= 0)           return "Selecciona un país.";
         return ciudadDAO.insertar(c) ? "Ciudad guardada." : "Error al guardar.";
     }
 
     public String actualizar(Ciudad c) {
         if (!SessionManager.puedeCRUD()) return "Sin permisos para esta acción.";
+        if (c.getNombre().isBlank())      return "El nombre es obligatorio.";
+        if (c.getIdPais() <= 0)           return "Selecciona un país.";
         return ciudadDAO.actualizar(c) ? "Ciudad actualizada." : "Error al actualizar.";
     }
 

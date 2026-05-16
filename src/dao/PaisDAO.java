@@ -1,104 +1,93 @@
 package dao;
 
-import model.Ciudad;
+import model.Pais;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * CiudadDAO - Maneja todas las operaciones de la tabla CIUDAD.
- * Actualizado: ahora usa id_pais (FK) en lugar del campo texto pais.
+ * PaisDAO - Maneja todas las operaciones de la tabla PAIS.
+ * CRUD completo. Los países se usan en combobox al crear/editar ciudades.
  */
-public class CiudadDAO {
+public class PaisDAO {
 
     private final Connection conn;
 
-    public CiudadDAO() {
+    public PaisDAO() {
         this.conn = ConexionDB.getInstancia().getConexion();
     }
 
     // ── INSERTAR ─────────────────────────────────────────────────────────
-    public boolean insertar(Ciudad c) {
-        String sql = "INSERT INTO ciudad (nombre, id_pais) VALUES (?, ?)";
+    public boolean insertar(Pais p) {
+        String sql = "INSERT INTO pais (nombre, codigo_iso) VALUES (?, ?)";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, c.getNombre());
-            ps.setInt   (2, c.getIdPais());
+            ps.setString(1, p.getNombre());
+            ps.setString(2, p.getCodigoIso());
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
-            System.err.println("Error al insertar ciudad: " + e.getMessage());
+            System.err.println("Error al insertar país: " + e.getMessage());
             return false;
         }
     }
 
     // ── ACTUALIZAR ───────────────────────────────────────────────────────
-    public boolean actualizar(Ciudad c) {
-        String sql = "UPDATE ciudad SET nombre = ?, id_pais = ? WHERE id_ciudad = ?";
+    public boolean actualizar(Pais p) {
+        String sql = "UPDATE pais SET nombre = ?, codigo_iso = ? WHERE id_pais = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, c.getNombre());
-            ps.setInt   (2, c.getIdPais());
-            ps.setInt   (3, c.getIdCiudad());
+            ps.setString(1, p.getNombre());
+            ps.setString(2, p.getCodigoIso());
+            ps.setInt   (3, p.getIdPais());
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
-            System.err.println("Error al actualizar ciudad: " + e.getMessage());
+            System.err.println("Error al actualizar país: " + e.getMessage());
             return false;
         }
     }
 
     // ── ELIMINAR ─────────────────────────────────────────────────────────
     public boolean eliminar(int id) {
-        String sql = "DELETE FROM ciudad WHERE id_ciudad = ?";
+        String sql = "DELETE FROM pais WHERE id_pais = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, id);
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
-            System.err.println("Error al eliminar ciudad: " + e.getMessage());
+            System.err.println("Error al eliminar país: " + e.getMessage());
             return false;
         }
     }
 
     // ── LISTAR TODOS ─────────────────────────────────────────────────────
-    public List<Ciudad> listarTodos() {
-        List<Ciudad> lista = new ArrayList<>();
-        String sql = """
-                SELECT c.id_ciudad, c.nombre, c.id_pais, p.nombre AS nombre_pais
-                FROM ciudad c
-                JOIN pais p ON c.id_pais = p.id_pais
-                ORDER BY p.nombre, c.nombre
-                """;
+    public List<Pais> listarTodos() {
+        List<Pais> lista = new ArrayList<>();
+        String sql = "SELECT * FROM pais ORDER BY nombre";
         try (Statement st = conn.createStatement();
              ResultSet rs = st.executeQuery(sql)) {
             while (rs.next()) lista.add(mapear(rs));
         } catch (SQLException e) {
-            System.err.println("Error al listar ciudades: " + e.getMessage());
+            System.err.println("Error al listar países: " + e.getMessage());
         }
         return lista;
     }
 
     // ── BUSCAR POR ID ────────────────────────────────────────────────────
-    public Ciudad buscarPorId(int id) {
-        String sql = """
-                SELECT c.id_ciudad, c.nombre, c.id_pais, p.nombre AS nombre_pais
-                FROM ciudad c
-                JOIN pais p ON c.id_pais = p.id_pais
-                WHERE c.id_ciudad = ?
-                """;
+    public Pais buscarPorId(int id) {
+        String sql = "SELECT * FROM pais WHERE id_pais = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, id);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) return mapear(rs);
         } catch (SQLException e) {
-            System.err.println("Error al buscar ciudad: " + e.getMessage());
+            System.err.println("Error al buscar país: " + e.getMessage());
         }
         return null;
     }
 
-    // ── MAPEAR ResultSet → Ciudad ────────────────────────────────────────
-    private Ciudad mapear(ResultSet rs) throws SQLException {
-        return new Ciudad(
-                rs.getInt   ("id_ciudad"),
-                rs.getString("nombre"),
+    // ── MAPEAR ResultSet → Pais ──────────────────────────────────────────
+    private Pais mapear(ResultSet rs) throws SQLException {
+        return new Pais(
                 rs.getInt   ("id_pais"),
-                rs.getString("nombre_pais")
+                rs.getString("nombre"),
+                rs.getString("codigo_iso")
         );
     }
 }

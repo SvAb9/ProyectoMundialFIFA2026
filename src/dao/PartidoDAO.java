@@ -27,10 +27,10 @@ public class PartidoDAO {
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setDate(1, new java.sql.Date(p.getFecha().getTime()));
             ps.setString(2, p.getHora());
-            ps.setInt   (3, p.getIdGrupo());
-            ps.setInt   (4, p.getIdEstadio());
-            ps.setInt   (5, p.getIdEquipoLocal());
-            ps.setInt   (6, p.getIdEquipoVisitante());
+            ps.setInt(3, p.getIdGrupo());
+            ps.setInt(4, p.getIdEstadio());
+            ps.setInt(5, p.getIdEquipoLocal());
+            ps.setInt(6, p.getIdEquipoVisitante());
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
             System.err.println("Error al insertar partido: " + e.getMessage());
@@ -48,11 +48,11 @@ public class PartidoDAO {
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setDate(1, new java.sql.Date(p.getFecha().getTime()));
             ps.setString(2, p.getHora());
-            ps.setInt   (3, p.getIdGrupo());
-            ps.setInt   (4, p.getIdEstadio());
-            ps.setInt   (5, p.getIdEquipoLocal());
-            ps.setInt   (6, p.getIdEquipoVisitante());
-            ps.setInt   (7, p.getIdPartido());
+            ps.setInt(3, p.getIdGrupo());
+            ps.setInt(4, p.getIdEstadio());
+            ps.setInt(5, p.getIdEquipoLocal());
+            ps.setInt(6, p.getIdEquipoVisitante());
+            ps.setInt(7, p.getIdPartido());
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
             System.err.println("Error al actualizar partido: " + e.getMessage());
@@ -89,12 +89,12 @@ public class PartidoDAO {
                 ORDER BY p.fecha, p.hora
                 """;
         try (Statement st = conn.createStatement();
-             ResultSet rs = st.executeQuery(sql)) {
+                ResultSet rs = st.executeQuery(sql)) {
             while (rs.next()) {
                 Partido pa = mapear(rs);
-                pa.setNombreGrupo          (rs.getString("nombre_grupo"));
-                pa.setNombreEstadio        (rs.getString("nombre_estadio"));
-                pa.setNombreEquipoLocal    (rs.getString("nombre_local"));
+                pa.setNombreGrupo(rs.getString("nombre_grupo"));
+                pa.setNombreEstadio(rs.getString("nombre_estadio"));
+                pa.setNombreEquipoLocal(rs.getString("nombre_local"));
                 pa.setNombreEquipoVisitante(rs.getString("nombre_visitante"));
                 lista.add(pa);
             }
@@ -108,7 +108,7 @@ public class PartidoDAO {
     /**
      * Requerimiento del enunciado:
      * "Listar los partidos que se llevarán a cabo en un estadio
-     *  cualquiera que el usuario elija."
+     * cualquiera que el usuario elija."
      */
     public List<Partido> listarPorEstadio(int idEstadio) {
         List<Partido> lista = new ArrayList<>();
@@ -131,9 +131,9 @@ public class PartidoDAO {
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
                 Partido pa = mapear(rs);
-                pa.setNombreGrupo          (rs.getString("nombre_grupo"));
-                pa.setNombreEstadio        (rs.getString("nombre_estadio"));
-                pa.setNombreEquipoLocal    (rs.getString("nombre_local"));
+                pa.setNombreGrupo(rs.getString("nombre_grupo"));
+                pa.setNombreEstadio(rs.getString("nombre_estadio"));
+                pa.setNombreEquipoLocal(rs.getString("nombre_local"));
                 pa.setNombreEquipoVisitante(rs.getString("nombre_visitante"));
                 lista.add(pa);
             }
@@ -152,20 +152,21 @@ public class PartidoDAO {
     public List<String[]> paisesPorSede() {
         List<String[]> lista = new ArrayList<>();
         String sql = """
-                SELECT ci.pais,
+                SELECT pa.nombre AS pais,
                        el.nombre AS equipo_local,
                        ev.nombre AS equipo_visitante
                 FROM partido p
                 JOIN estadio es ON p.id_estadio          = es.id_estadio
                 JOIN ciudad  ci ON es.id_ciudad           = ci.id_ciudad
+                JOIN pais    pa ON ci.id_pais             = pa.id_pais
                 JOIN equipo  el ON p.id_equipo_local      = el.id_equipo
                 JOIN equipo  ev ON p.id_equipo_visitante  = ev.id_equipo
-                ORDER BY ci.pais, el.nombre
+                ORDER BY pa.nombre, el.nombre
                 """;
         try (Statement st = conn.createStatement();
-             ResultSet rs = st.executeQuery(sql)) {
+                ResultSet rs = st.executeQuery(sql)) {
             while (rs.next()) {
-                lista.add(new String[]{
+                lista.add(new String[] {
                         rs.getString("pais"),
                         rs.getString("equipo_local"),
                         rs.getString("equipo_visitante")
@@ -180,13 +181,13 @@ public class PartidoDAO {
     // ── MAPEAR ResultSet → Partido ────────────────────────────────────────
     private Partido mapear(ResultSet rs) throws SQLException {
         Partido p = new Partido();
-        p.setIdPartido        (rs.getInt   ("id_partido"));
-        p.setFecha            (rs.getDate  ("fecha"));
-        p.setHora             (rs.getString("hora"));
-        p.setIdGrupo          (rs.getInt   ("id_grupo"));
-        p.setIdEstadio        (rs.getInt   ("id_estadio"));
-        p.setIdEquipoLocal    (rs.getInt   ("id_equipo_local"));
-        p.setIdEquipoVisitante(rs.getInt   ("id_equipo_visitante"));
+        p.setIdPartido(rs.getInt("id_partido"));
+        p.setFecha(rs.getDate("fecha"));
+        p.setHora(rs.getString("hora"));
+        p.setIdGrupo(rs.getInt("id_grupo"));
+        p.setIdEstadio(rs.getInt("id_estadio"));
+        p.setIdEquipoLocal(rs.getInt("id_equipo_local"));
+        p.setIdEquipoVisitante(rs.getInt("id_equipo_visitante"));
         return p;
     }
 }
